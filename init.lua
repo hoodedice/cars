@@ -29,5 +29,29 @@ minetest.register_entity(":streets:melcar",{
 				minetest.chat_send_player(clicker:get_player_name(),"This car already has a driver")
 			end
 		end
+	end,
+	on_step = function(self,dtime)
+		if self.props.driver then
+			local ctrl = minetest.get_player_by_name(self.props.driver):get_player_control()
+			-- If player moves, move the car
+			if ctrl.up then
+				minetest.chat_send_all("up")
+			elseif ctrl.down then
+				minetest.chat_send_all("down")
+			elseif ctrl.left then
+				minetest.chat_send_all("left")
+			elseif ctrl.right then
+				minetest.chat_send_all("right")
+			end
+		end
+		-- Gravity
+		local pos = self.object:getpos()
+		pos.y = math.floor(pos.y)
+		if minetest.get_node(pos).name == "air" then
+			self.object:setacceleration({x=0,y=-1 * self.initial_properties.weight / 10,z=0})
+		else
+			self.object:setacceleration({x=0,y=0,z=0})
+			self.object:setvelocity({x=0,y=0,z=0})
+		end
 	end
 })
