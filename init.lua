@@ -8,10 +8,16 @@ minetest.register_entity(":streets:melcar",{
 		weight = 100,
 		visual = "mesh",
 		mesh = "car_001.obj",
-		textures = {"textur_black.png"}
+		textures = {"textur_yellow.png"},
+		collisionbox = {-0.5,0.0,-1.85,1.35,1.5,1.25}
 	},
 	props = {
 		driver = nil,
+		on_ground = false,
+		max_speed = 10.0,
+		speed = 0,
+		accel = 4,
+		decel = 6
 	},
 	on_rightclick = function(self,clicker)
 		if self.props.driver == nil then
@@ -31,27 +37,47 @@ minetest.register_entity(":streets:melcar",{
 		end
 	end,
 	on_step = function(self,dtime)
+		minetest.chat_send_all(self.object:getvelocity().z .. " of " .. self.props.max_speed)
 		if self.props.driver then
 			local ctrl = minetest.get_player_by_name(self.props.driver):get_player_control()
 			-- If player moves, move the car
 			if ctrl.up then
-				minetest.chat_send_all("up")
-			elseif ctrl.down then
-				minetest.chat_send_all("down")
-			elseif ctrl.left then
-				minetest.chat_send_all("left")
-			elseif ctrl.right then
-				minetest.chat_send_all("right")
+				-- Only accelerate if speed < max_speed
+				if self.object:getvelocity().z >= self.props.max_speed then
+					self.object:setacceleration({x=0,y=0,z=0})
+				else
+					self.object:setacceleration({x=0,y=0,z= self.props.accel})
+				end
+			else
+				-- Stop is speed < 0.5
+				if self.object:getvelocity().z <= 0.5 then
+					self.object:setacceleration({x=0,y=0,z=0})
+					self.object:setvelocity({x=0,y=0,z=0})
+				else
+					self.object:setacceleration({x=0,y=0,z= self.props.decel * -1})
+				end
 			end
+		else
+			
 		end
 		-- Gravity
 		local pos = self.object:getpos()
 		pos.y = math.floor(pos.y)
 		if minetest.get_node(pos).name == "air" then
+			-- Fall if air under car
 			self.object:setacceleration({x=0,y=-1 * self.initial_properties.weight / 10,z=0})
+			self.props.on_ground = false
 		else
-			self.object:setacceleration({x=0,y=0,z=0})
-			self.object:setvelocity({x=0,y=0,z=0})
+			if self.props.on_ground == false then
+				-- Stop falling if on ground
+				minetest.after(1,function()
+					self.object:setacceleration({x=0,y=0,z=0})
+					self.object:setvelocity({x=0,y=0,z=0})
+					self.props.on_ground = true
+				end)
+			end
 		end
+		-- Update properties
+		self.props.speed = self.object:getvelocity()
 	end
 })
