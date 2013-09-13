@@ -8,6 +8,7 @@ minetest.register_entity(":streets:melcar",{
 		weight = 100,
 		visual = "mesh",
 		mesh = "car_001.obj",
+		visual_size = {x=1,y=1},
 		textures = {"textur_yellow.png"},
 		collisionbox = {-0.5,0.0,-1.85,1.35,1.5,1.25}
 	},
@@ -17,7 +18,9 @@ minetest.register_entity(":streets:melcar",{
 		max_speed = 10.0,
 		speed = 0,
 		accel = 4,
-		decel = 6
+		decel = 6,
+		gears = 3,
+		shift_time = 0.75,
 	},
 	on_rightclick = function(self,clicker)
 		if self.props.driver == nil then
@@ -49,13 +52,16 @@ minetest.register_entity(":streets:melcar",{
 					self.object:setacceleration({x=0,y=0,z= self.props.accel})
 				end
 			else
-				-- Stop is speed < 0.5
+				-- Stop if speed < 0.5
 				if self.object:getvelocity().z <= 0.5 then
 					self.object:setacceleration({x=0,y=0,z=0})
 					self.object:setvelocity({x=0,y=0,z=0})
 				else
 					self.object:setacceleration({x=0,y=0,z= self.props.decel * -1})
 				end
+			end
+			if ctrl.down then
+
 			end
 		else
 			
