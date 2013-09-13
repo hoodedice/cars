@@ -28,12 +28,26 @@ minetest.register_entity(":streets:melcar",{
 			self.props.driver = clicker:get_player_name()
 			-- Attach player
 			clicker:set_attach(self.object, "", {x=0,y=5,z=0}, {x=0,y=0,z=0})
+			-- HUD
+			clicker:hud_set_flags({
+				hotbar = false,
+				healthbar = false,
+				crosshair = false,
+				wielditem = false
+			})
 		else
 			if self.props.driver == clicker:get_player_name() then
 				-- Update driver
 				self.props.driver = nil
 				-- Detach player
 				clicker:set_detach()
+				-- HUD
+				clicker:hud_set_flags({
+					hotbar = true,
+					healthbar = true,
+					crosshair = true,
+					wielditem = true
+				})
 			else
 				minetest.chat_send_player(clicker:get_player_name(),"This car already has a driver")
 			end
