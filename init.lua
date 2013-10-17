@@ -5,7 +5,7 @@ minetest.register_entity(":streets:melcar",{
 	initial_properties = {
 		hp_max = 100,
 		physical = true,
-		weight = 100,
+		weight = 1,	-- ( in tons)
 		visual = "mesh",
 		mesh = "car_001.obj",
 		visual_size = {x=1,y=1},
@@ -16,12 +16,24 @@ minetest.register_entity(":streets:melcar",{
 		driver = nil,
 		on_ground = false,
 		max_speed = 10.0,
-		speed = 0,
 		accel = 4,
 		decel = 6,
 		gears = 3,
 		shift_time = 0.75,
+		
+		-- Runtime variables
+		speed = 0,
+		engine_rpm = 0,
+		gear = 0,
+		hud = {
+			gear,
+			rpm,
+		}
 	},
+	on_activate = function(self)
+		-- Gravity
+		self.object:setacceleration({x=0,y= self.initial_properties.weight * 9.81 * -1,z=0})
+	end,
 	on_rightclick = function(self,clicker)
 		if self.props.driver == nil then
 			-- Update driver
@@ -35,6 +47,17 @@ minetest.register_entity(":streets:melcar",{
 				crosshair = false,
 				wielditem = false
 			})
+			self.props.hud.rpm = clicker:hud_add({
+				hud_elem_type = "text",
+				position = {x=0.1,y=0.9},
+				name = "Gear",
+				scale = {x=100,y=100},
+				text = "1",
+				number = 0xFFFFFF
+			})
+			-- Start engine
+			self.props.engine_rpm = 500
+			self.props.gear = 1
 		else
 			if self.props.driver == clicker:get_player_name() then
 				-- Update driver
@@ -54,50 +77,37 @@ minetest.register_entity(":streets:melcar",{
 		end
 	end,
 	on_step = function(self,dtime)
-		minetest.chat_send_all(self.object:getvelocity().z .. " of " .. self.props.max_speed)
+		minetest.chat_send_all(self.props.engine_rpm)
+		-- Engine RPM, used to calculate the speed
 		if self.props.driver then
 			local ctrl = minetest.get_player_by_name(self.props.driver):get_player_control()
 			-- If player moves, move the car
 			if ctrl.up then
-				-- Only accelerate if speed < max_speed
-				if self.object:getvelocity().z >= self.props.max_speed then
-					self.object:setacceleration({x=0,y=0,z=0})
-				else
-					self.object:setacceleration({x=0,y=0,z= self.props.accel})
+				if self.props.engine_rpm < 5000 then
+					self.props.engine_rpm = self.props.engine_rpm + 25
 				end
 			else
-				-- Stop if speed < 0.5
-				if self.object:getvelocity().z <= 0.5 then
-					self.object:setacceleration({x=0,y=0,z=0})
-					self.object:setvelocity({x=0,y=0,z=0})
-				else
-					self.object:setacceleration({x=0,y=0,z= self.props.decel * -1})
+				if self.props.engine_rpm >= 520 then
+					self.props.engine_rpm = self.props.engine_rpm - 20
 				end
 			end
 			if ctrl.down then
-
+				self.props.gear = -1
 			end
 		else
 			
 		end
-		-- Gravity
-		local pos = self.object:getpos()
-		pos.y = math.floor(pos.y)
-		if minetest.get_node(pos).name == "air" then
-			-- Fall if air under car
-			self.object:setacceleration({x=0,y=-1 * self.initial_properties.weight / 10,z=0})
-			self.props.on_ground = false
-		else
-			if self.props.on_ground == false then
-				-- Stop falling if on ground
-				minetest.after(1,function()
-					self.object:setacceleration({x=0,y=0,z=0})
-					self.object:setvelocity({x=0,y=0,z=0})
-					self.props.on_ground = true
-				end)
+		-- Calculate speed
+			if self.props.engine_rpm >= 550 then
+				self.object:setacceleration({x= self.props.engine_rpm / 1000 * self.props.gear ,y=0,z=0})
+			elseif self.props.rpm <= 550 then
+				self.object:setacceleration({x=0,y=0,z=0})
 			end
-		end
 		-- Update properties
 		self.props.speed = self.object:getvelocity()
+		-- Update HUD
+		if self.props.driver then
+			--
+		end
 	end
 })
