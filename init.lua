@@ -11,6 +11,10 @@ local function get_single_accels(p)
 	return output
 end
 
+local function merge_single_forces(x,z)
+	return math.sqrt(math.pow(x,2) + math.pow(z,2))
+end
+
 minetest.register_entity(":streets:melcar",{
 	initial_properties = {
 		hp_max = 100,
@@ -37,7 +41,8 @@ minetest.register_entity(":streets:melcar",{
 		speed = 0,
 		rpm = 0,
 		gear = 0,
-		brake_factor = 1,
+		brake = false,
+		accelerate = false,
 		hud = {
 			gear,
 			rpm,
@@ -97,21 +102,26 @@ minetest.register_entity(":streets:melcar",{
 			local ctrl = minetest.get_player_by_name(self.props.driver):get_player_control()
 			-- up
 			if ctrl.up then
-				self.props.brake = 1
+				self.props.brake = false
+				self.props.accelerate = true
 				if self.props.rpm < self.props.max_rpm then
 					self.props.rpm = self.props.rpm + 40
 				end
 			else
+				self.props.accelerate = false
 				if self.props.rpm >= 520 then
 					self.props.rpm = self.props.rpm - 20
 				end
 			end
 			-- down
 			if ctrl.down then
-				self.props.brake = -1
+				self.props.brake = true
+				self.props.accelerate = false
 				if self.props.rpm >= 520 then
 					self.props.rpm = self.props.rpm - 40
 				end
+			else
+				self.props.brake = false
 			end
 			-- left
 			if ctrl.left then
@@ -123,12 +133,25 @@ minetest.register_entity(":streets:melcar",{
 			end
 		end
 		-- Calculate acceleration
-		if self.props.brake == 1 then
-			local accel = (self.props.rpm / 1000 - 0.5) * self.props.gear * self.props.brake_factor
+		if self.props.brake == false then
+			local accel = (self.props.rpm / 1000 - 0.5) * self.props.gear
 			self.object:setacceleration(get_single_accels({
 				dir = self.object:getyaw(),
 				accel = accel
 			}))
+		else
+			if merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z) > 0.1 then
+				self.object:setacceleration(get_single_accels({
+					dir = self.object:getyaw(),
+					accel = -8
+				}))
+			end
+		end
+		-- Stop if very slow (e.g. because driver brakes)
+		minetest.chat_send_all("Accel: " .. tostring(self.props.accelerate) .. ", Brake: " .. tostring(self.props.brake))
+		if math.abs(merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) < 1 and self.props.accelerate == false and self.props.brake == false then
+			self.object:setacceleration({x=0,y=0,z=0})
+			self.object:setvelocity({x=0,y=0,z=0})
 		end
 	end
 })
