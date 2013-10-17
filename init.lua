@@ -10,7 +10,8 @@ minetest.register_entity(":streets:melcar",{
 		mesh = "car_001.obj",
 		visual_size = {x=1,y=1},
 		textures = {"textur_yellow.png"},
-		collisionbox = {-0.5,0.0,-1.85,1.35,1.5,1.25}
+		collisionbox = {-0.5,0.0,-1.85,1.35,1.5,1.25},
+		stepheight = 0.5
 	},
 	props = {
 		driver = nil,
@@ -77,37 +78,6 @@ minetest.register_entity(":streets:melcar",{
 		end
 	end,
 	on_step = function(self,dtime)
-		minetest.chat_send_all(self.props.engine_rpm)
-		-- Engine RPM, used to calculate the speed
-		if self.props.driver then
-			local ctrl = minetest.get_player_by_name(self.props.driver):get_player_control()
-			-- If player moves, move the car
-			if ctrl.up then
-				if self.props.engine_rpm < 5000 then
-					self.props.engine_rpm = self.props.engine_rpm + 25
-				end
-			else
-				if self.props.engine_rpm >= 520 then
-					self.props.engine_rpm = self.props.engine_rpm - 20
-				end
-			end
-			if ctrl.down then
-				self.props.gear = -1
-			end
-		else
-			
-		end
-		-- Calculate speed
-			if self.props.engine_rpm >= 550 then
-				self.object:setacceleration({x= self.props.engine_rpm / 1000 * self.props.gear ,y=0,z=0})
-			elseif self.props.rpm <= 550 then
-				self.object:setacceleration({x=0,y=0,z=0})
-			end
-		-- Update properties
-		self.props.speed = self.object:getvelocity()
-		-- Update HUD
-		if self.props.driver then
-			--
-		end
+		
 	end
 })
