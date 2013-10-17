@@ -6,7 +6,7 @@ local function get_single_accels(p)
 	local alpha = p.dir
 	local beta = 180 - 90 - alpha
 	local hyp = p.accel
-	output.x = math.sin(alpha) * hyp
+	output.x = math.sin(alpha) * hyp * -1
 	output.z = math.sin(beta) * hyp
 	return output
 end
