@@ -2,12 +2,12 @@
 	StreetsMod: Experimental cars
 ]]
 local function get_single_accels(self,p)
-	local output = {x = 0, y = self.initial_properties.weight * 9.81 * -1, z = 0}
+	local output = {x = 0, y = -9.81, z = 0}
 	local alpha = p.dir
 	local beta = 180 - 90 - alpha
 	local hyp = p.accel
-	output.x = math.sin(alpha) * hyp * -1
-	output.z = math.sin(beta) * hyp
+	output.x = (math.sin(alpha) * hyp * -1) / self.initial_properties.weight
+	output.z = (math.sin(beta) * hyp) / self.initial_properties.weight
 	return output
 end
 
@@ -19,7 +19,7 @@ minetest.register_entity(":streets:melcar",{
 	initial_properties = {
 		hp_max = 100,
 		physical = true,
-		weight = 1,	-- ( in tons)
+		weight = 1000,	-- ( in kg)
 		visual = "mesh",
 		mesh = "car_001.obj",
 		visual_size = {x=1,y=1},
@@ -50,7 +50,7 @@ minetest.register_entity(":streets:melcar",{
 	},
 	on_activate = function(self)
 		-- Gravity
-		self.object:setacceleration({x=0,y= self.initial_properties.weight * 9.81 * -1,z=0})
+		self.object:setacceleration({x=0,y= -9.81,z=0})
 		self.props.rpm = 500
 		self.props.gear = 1
 	end,
@@ -134,7 +134,7 @@ minetest.register_entity(":streets:melcar",{
 		end
 		-- Calculate acceleration
 		if self.props.brake == false then
-			local accel = (self.props.rpm / 1000 - 0.5) * self.props.gear
+			local accel = (self.props.rpm - 500) * self.props.gear
 			self.object:setacceleration(get_single_accels(self,{
 				dir = self.object:getyaw(),
 				accel = accel
@@ -143,7 +143,7 @@ minetest.register_entity(":streets:melcar",{
 			if merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z) > 0.1 then
 				self.object:setacceleration(get_single_accels(self,{
 					dir = self.object:getyaw(),
-					accel = -8
+					accel = -8000
 				}))
 			end
 		end
@@ -151,7 +151,7 @@ minetest.register_entity(":streets:melcar",{
 		if self.props.accelerate == false and self.props.brake == false then
 			self.object:setacceleration(get_single_accels(self,{
 				dir = self.object:getyaw(),
-				accel = -2
+				accel = -2000
 			}))
 		end
 		-- Stop if very slow (e.g. because driver brakes)
