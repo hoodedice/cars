@@ -32,8 +32,8 @@ minetest.register_entity(":streets:melcar",{
 		on_ground = false,
 		max_speed = 10.0,
 		max_rpm = 4000,
-		accel = 4,
-		decel = 6,
+		accel = 1.5,
+		decel = 1,
 		gears = 5,
 		shift_time = 0.75,
 		
@@ -43,6 +43,7 @@ minetest.register_entity(":streets:melcar",{
 		gear = 0,
 		brake = false,
 		accelerate = false,
+		sound = nil,
 		hud = {
 			gear,
 			rpm,
@@ -70,6 +71,19 @@ minetest.register_entity(":streets:melcar",{
 			-- Start engine
 			self.props.engine_rpm = 500
 			self.props.gear = 1
+			minetest.sound_play("cars_car_start", {
+				object = self.object,
+				max_hear_distance = 35,
+				gain = 10.0,
+			})
+			minetest.after(1.8,function()
+				self.props.sound = minetest.sound_play("cars_car_idle", {
+					object = self.object,
+					max_hear_distance = 35,
+					gain = 10.0,
+					loop = true
+				})
+			end)
 		else
 			if self.props.driver == clicker:get_player_name() then
 				-- Update driver
@@ -83,6 +97,10 @@ minetest.register_entity(":streets:melcar",{
 					crosshair = true,
 					wielditem = true
 				})
+				if self.props.sound then
+					minetest.sound_stop(self.props.sound)
+					self.props.sound = nil
+				end
 			else
 				minetest.chat_send_player(clicker:get_player_name(),"This car already has a driver")
 			end
@@ -126,7 +144,7 @@ minetest.register_entity(":streets:melcar",{
 		end
 		-- Calculate acceleration
 		if self.props.brake == false then
-			local accel = (self.props.rpm - 500) * self.props.gear
+			local accel = (self.props.rpm - 500) * self.props.gear * self.props.accel
 			self.object:setacceleration(get_single_accels(self,{
 				dir = self.object:getyaw(),
 				accel = accel
@@ -135,7 +153,7 @@ minetest.register_entity(":streets:melcar",{
 			if merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z) > 0.1 then
 				self.object:setacceleration(get_single_accels(self,{
 					dir = self.object:getyaw(),
-					accel = -8000
+					accel = -8000 * self.props.decel
 				}))
 			end
 		end
