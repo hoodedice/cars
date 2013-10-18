@@ -67,14 +67,14 @@ minetest.register_entity(":streets:melcar",{
 				crosshair = false,
 				wielditem = false
 			})
-			self.props.hud.rpm = clicker:hud_add({
+			--[[self.props.hud.rpm = clicker:hud_add({
 				hud_elem_type = "text",
 				position = {x=0.1,y=0.9},
 				name = "Gear",
 				scale = {x=100,y=100},
 				text = "1",
 				number = 0xFFFFFF
-			})
+			})]]
 			-- Start engine
 			self.props.engine_rpm = 500
 			self.props.gear = 1
