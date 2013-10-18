@@ -67,14 +67,6 @@ minetest.register_entity(":streets:melcar",{
 				crosshair = false,
 				wielditem = false
 			})
-			--[[self.props.hud.rpm = clicker:hud_add({
-				hud_elem_type = "text",
-				position = {x=0.1,y=0.9},
-				name = "Gear",
-				scale = {x=100,y=100},
-				text = "1",
-				number = 0xFFFFFF
-			})]]
 			-- Start engine
 			self.props.engine_rpm = 500
 			self.props.gear = 1
@@ -105,12 +97,12 @@ minetest.register_entity(":streets:melcar",{
 				self.props.brake = false
 				self.props.accelerate = true
 				if self.props.rpm < self.props.max_rpm then
-					self.props.rpm = self.props.rpm + 40
+					self.props.rpm = self.props.rpm + 20 * (self.props.gears + 1 - self.props.gear)
 				end
 			else
 				self.props.accelerate = false
 				if self.props.rpm >= 520 then
-					self.props.rpm = self.props.rpm - 20
+					self.props.rpm = self.props.rpm - 20 * self.props.gear
 				end
 			end
 			-- down
