@@ -34,7 +34,7 @@ minetest.register_entity(":streets:melcar",{
 		max_rpm = 4000,
 		accel = 4,
 		decel = 6,
-		gears = 3,
+		gears = 5,
 		shift_time = 0.75,
 		
 		-- Runtime variables
@@ -145,6 +145,10 @@ minetest.register_entity(":streets:melcar",{
 				dir = self.object:getyaw(),
 				accel = -2000
 			}))
+		end
+		-- Stop acceleration if max_speed reached
+		if merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z) >= self.props.max_speed and self.props.brake == false then
+			self.object:setacceleration({x = 0, y= -9.81, z = 0})
 		end
 		-- Stop if very slow (e.g. because driver brakes)
 		if math.abs(merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) < 1 and self.props.accelerate == false and self.props.brake == false then
