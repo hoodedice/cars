@@ -1,8 +1,8 @@
 --[[
 	StreetsMod: Experimental cars
 ]]
-local function get_single_accels(p)
-	local output = {x = 0, y = 0, z = 0}
+local function get_single_accels(self,p)
+	local output = {x = 0, y = self.initial_properties.weight * 9.81 * -1, z = 0}
 	local alpha = p.dir
 	local beta = 180 - 90 - alpha
 	local hyp = p.accel
@@ -135,23 +135,39 @@ minetest.register_entity(":streets:melcar",{
 		-- Calculate acceleration
 		if self.props.brake == false then
 			local accel = (self.props.rpm / 1000 - 0.5) * self.props.gear
-			self.object:setacceleration(get_single_accels({
+			self.object:setacceleration(get_single_accels(self,{
 				dir = self.object:getyaw(),
 				accel = accel
 			}))
 		else
 			if merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z) > 0.1 then
-				self.object:setacceleration(get_single_accels({
+				self.object:setacceleration(get_single_accels(self,{
 					dir = self.object:getyaw(),
 					accel = -8
 				}))
 			end
 		end
+		-- Slow down, if car doesn't accelerate
+		if self.props.accelerate == false and self.props.brake == false then
+			self.object:setacceleration(get_single_accels(self,{
+				dir = self.object:getyaw(),
+				accel = -2
+			}))
+		end
 		-- Stop if very slow (e.g. because driver brakes)
-		minetest.chat_send_all("Accel: " .. tostring(self.props.accelerate) .. ", Brake: " .. tostring(self.props.brake))
 		if math.abs(merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) < 1 and self.props.accelerate == false and self.props.brake == false then
-			self.object:setacceleration({x=0,y=0,z=0})
+			self.object:setacceleration({x=0,y=self.initial_properties.weight * 9.81 * -1,z=0})
 			self.object:setvelocity({x=0,y=0,z=0})
 		end
+		-- Shift gears
+		if self.props.rpm > 3000 and self.props.gear < self.props.gears then
+			self.props.gear = self.props.gear + 1
+			self.props.rpm = math.random(700,800)
+		end
+		if self.props.rpm < 700 and self.props.gear > 1 then
+			self.props.gear = self.props.gear - 1
+			self.props.rpm = self.props.rpm + math.random(200,500)
+		end
+		minetest.chat_send_all(self.props.gear .. " | " .. self.props.rpm)
 	end
 })
