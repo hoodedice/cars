@@ -142,6 +142,7 @@ minetest.register_entity(":streets:melcar",{
 				self.object:setyaw(self.object:getyaw() - 1 * dtime)
 			end
 		end
+		-- Reset acceleration
 		-- Calculate acceleration
 		if self.props.brake == false then
 			local accel = (self.props.rpm - 500) * self.props.gear * self.props.accel
@@ -169,8 +170,9 @@ minetest.register_entity(":streets:melcar",{
 			self.object:setacceleration({x = 0, y= -9.81, z = 0})
 		end
 		-- Stop if very slow (e.g. because driver brakes)
-		if math.abs(merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) < 0.25 and self.props.accelerate == false then
-			self.object:setacceleration({x=0,y=self.initial_properties.weight * 9.81 * -1,z=0})
+		minetest.chat_send_all("V = " .. merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z))
+		if math.abs(merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) < 1 and self.props.accelerate == false then
+			self.object:setacceleration({x=0,y= -9.81 ,z=0})
 			self.object:setvelocity({x=0,y=0,z=0})
 		end
 		-- Shift gears
