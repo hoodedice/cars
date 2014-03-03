@@ -1,19 +1,7 @@
 --[[
 	StreetsMod: Experimental cars
 ]]
-local function get_single_accels(self,p)
-	local output = {x = 0, y = -9.81, z = 0}
-	local alpha = p.dir
-	local beta = 180 - 90 - alpha
-	local hyp = p.accel
-	output.x = (math.sin(alpha) * hyp * -1) / self.initial_properties.weight
-	output.z = (math.sin(beta) * hyp) / self.initial_properties.weight
-	return output
-end
-
-local function merge_single_forces(x,z)
-	return math.sqrt(math.pow(x,2) + math.pow(z,2))
-end
+dofile(minetest.get_modpath("cars") .. "/physHelpers.lua")
 
 minetest.register_entity(":streets:melcar",{
 	initial_properties = {
@@ -170,7 +158,6 @@ minetest.register_entity(":streets:melcar",{
 			self.object:setacceleration({x = 0, y= -9.81, z = 0})
 		end
 		-- Stop if very slow (e.g. because driver brakes)
-		minetest.chat_send_all("V = " .. merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z))
 		if math.abs(merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) < 1 and self.props.accelerate == false then
 			self.object:setacceleration({x=0,y= -9.81 ,z=0})
 			self.object:setvelocity({x=0,y=0,z=0})
