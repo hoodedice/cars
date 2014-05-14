@@ -120,8 +120,8 @@ minetest.register_entity(":streets:melcar",{
 		end
 		-- Calculate acceleration
 		if self.props.brake == false then
-			local accel = (self.props.rpm - 500) * self.props.accel
-			minetest.chat_send_all(accel)
+			accel = (self.props.rpm - 500) * self.props.accel / 15
+			
 			--[[self.object:setacceleration(get_single_accels(self,{
 				dir = self.object:getyaw(),
 				accel = accel
@@ -150,15 +150,6 @@ minetest.register_entity(":streets:melcar",{
 			self.object:setacceleration({x=0,y= -9.81 ,z=0})
 			self.object:setvelocity({x=0,y=0,z=0})
 		end
-		--[[ Shift gears
-		if self.props.rpm > 3000 and self.props.gear < self.props.gears then
-			self.props.gear = self.props.gear + 1
-			self.props.rpm = math.random(700,800)
-		end
-		if self.props.rpm < 700 and self.props.gear > 1 then
-			self.props.gear = self.props.gear - 1
-			self.props.rpm = self.props.rpm + math.random(500,600)
-		end]]
-		minetest.chat_send_all(self.props.rpm)
+		minetest.chat_send_all("RPM: " .. self.props.rpm .. " | A: " .. accel)
 	end
 })
