@@ -92,7 +92,6 @@ minetest.register_entity(":streets:melcar",{
 					self.props.rpm = self.props.rpm + 20
 				end
 			else
-				self.props.brake = false
 				self.props.accelerate = false
 				if self.props.rpm >= 520 then
 					self.props.rpm = self.props.rpm - 20
@@ -106,7 +105,6 @@ minetest.register_entity(":streets:melcar",{
 					self.props.rpm = self.props.rpm - 20
 				end
 			else
-				self.props.accelerate = false
 				self.props.brake = false
 			end
 			-- left
@@ -120,36 +118,76 @@ minetest.register_entity(":streets:melcar",{
 		end
 		-- Calculate acceleration
 		if self.props.brake == false then
-			accel = (self.props.rpm - 500) * self.props.accel / 15
-			
-			--[[self.object:setacceleration(get_single_accels(self,{
+			accel = (self.props.rpm - 500) * self.props.accel
+			table.insert(self.props.forces, force2vec(self, {
 				dir = self.object:getyaw(),
 				accel = accel
-			}))]]
+			}))
 		else
 			if merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z) > 0.1 then
-				--[[self.object:setacceleration(get_single_accels(self,{
+				table.insert(self.props.forces, force2vec(self,{
 					dir = self.object:getyaw(),
 					accel = -8000 * self.props.decel
-				}))]]
+				}))
 			end
 		end
 		-- Slow down, if car doesn't accelerate
 		if self.props.accelerate == false and self.props.brake == false then
-			--[[self.object:setacceleration(get_single_accels(self,{
+			table.insert(self.props.forces, force2vec(self,{
 				dir = self.object:getyaw(),
 				accel = -2000
-			}))]]
+			}))
 		end
 		-- Stop acceleration if max_speed reached
 		if merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z) >= self.props.max_speed and self.props.brake == false then
 			self.object:setacceleration({x = 0, y= -9.81, z = 0})
+			self.props.forces = {
+				{x = 0, y = -9.81, z = 0}
+			}
 		end
 		-- Stop if very slow (e.g. because driver brakes)
-		if math.abs(merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) < 1 and self.props.accelerate == false then
+		if math.abs(merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) < 0.1 and self.props.accelerate == false then
 			self.object:setacceleration({x=0,y= -9.81 ,z=0})
 			self.object:setvelocity({x=0,y=0,z=0})
+			self.props.forces = {
+				{x = 0, y = -9.81, z = 0}
+			}
 		end
+		
+		local res = {x = 0, y = -9.81, z = 0}
+		local allX = {}
+		local allY = {}
+		local allZ = {}
+		
+		for k, v in pairs(self.props.forces) do
+			table.insert(allX, v.x)
+			table.insert(allY, v.y)
+			table.insert(allZ, v.z)
+		end
+		
+		for k, v in pairs(allX) do
+			res.x = res.x + v
+		end
+		res.x = res.x / #allX
+		for k, v in pairs(allY) do
+			res.y = res.y + v
+		end
+		res.y = res.y / #allY
+		for k, v in pairs(allZ) do
+			res.z = res.z + v
+		end
+		res.z = res.z / #allZ
+		
+		-- Acceleration = Force / Weight
+		res.x = res.x / self.initial_properties.weight
+		res.z = res.z / self.initial_properties.weight
+		
+		self.object:setacceleration(res)
 		minetest.chat_send_all("RPM: " .. self.props.rpm .. " | A: " .. accel)
+		minetest.chat_send_all("Resulting (out of " .. #self.props.forces .. " forces: " .. minetest.serialize(res))
+		
+		self.props.forces = {
+			{x = 0, y = -9.81, z = 0}
+		}
 	end
 })
