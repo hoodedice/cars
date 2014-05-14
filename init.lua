@@ -59,19 +59,6 @@ minetest.register_entity(":streets:melcar",{
 			-- Start engine
 			self.props.engine_rpm = 500
 			self.props.gear = 1
-			minetest.sound_play("cars_car_start", {
-				object = self.object,
-				max_hear_distance = 35,
-				gain = 10.0,
-			})
-			minetest.after(1.8,function()
-				self.props.sound = minetest.sound_play("cars_car_idle", {
-					object = self.object,
-					max_hear_distance = 35,
-					gain = 10.0,
-					loop = true
-				})
-			end)
 		else
 			if self.props.driver == clicker:get_player_name() then
 				-- Update driver
@@ -85,10 +72,6 @@ minetest.register_entity(":streets:melcar",{
 					crosshair = true,
 					wielditem = true
 				})
-				if self.props.sound then
-					minetest.sound_stop(self.props.sound)
-					self.props.sound = nil
-				end
 			else
 				minetest.chat_send_player(clicker:get_player_name(),"This car already has a driver")
 			end
