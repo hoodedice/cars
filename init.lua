@@ -35,11 +35,14 @@ minetest.register_entity(":streets:melcar",{
 		hud = {
 			gear,
 			rpm,
-		}
+		},
+		forces = {
+			{x = 0, y = -9.81, z = 0}
+		},
 	},
 	on_activate = function(self)
 		-- Gravity
-		self.object:setacceleration({x=0,y= -9.81,z=0})
+		--self.object:setacceleration({x=0,y= -9.81,z=0})
 		self.props.rpm = 500
 		self.props.gear = 1
 	end,
@@ -86,12 +89,13 @@ minetest.register_entity(":streets:melcar",{
 				self.props.brake = false
 				self.props.accelerate = true
 				if self.props.rpm < self.props.max_rpm then
-					self.props.rpm = self.props.rpm + 20 * (self.props.gears + 1 - self.props.gear)
+					self.props.rpm = self.props.rpm + 20
 				end
 			else
+				self.props.brake = false
 				self.props.accelerate = false
 				if self.props.rpm >= 520 then
-					self.props.rpm = self.props.rpm - 20 * self.props.gear
+					self.props.rpm = self.props.rpm - 20
 				end
 			end
 			-- down
@@ -99,9 +103,10 @@ minetest.register_entity(":streets:melcar",{
 				self.props.brake = true
 				self.props.accelerate = false
 				if self.props.rpm >= 520 then
-					self.props.rpm = self.props.rpm - 40
+					self.props.rpm = self.props.rpm - 20
 				end
 			else
+				self.props.accelerate = false
 				self.props.brake = false
 			end
 			-- left
@@ -113,28 +118,28 @@ minetest.register_entity(":streets:melcar",{
 				self.object:setyaw(self.object:getyaw() - 1 * dtime)
 			end
 		end
-		-- Reset acceleration
 		-- Calculate acceleration
 		if self.props.brake == false then
-			local accel = (self.props.rpm - 500) * self.props.gear * self.props.accel
-			self.object:setacceleration(get_single_accels(self,{
+			local accel = (self.props.rpm - 500) * self.props.accel
+			minetest.chat_send_all(accel)
+			--[[self.object:setacceleration(get_single_accels(self,{
 				dir = self.object:getyaw(),
 				accel = accel
-			}))
+			}))]]
 		else
 			if merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z) > 0.1 then
-				self.object:setacceleration(get_single_accels(self,{
+				--[[self.object:setacceleration(get_single_accels(self,{
 					dir = self.object:getyaw(),
 					accel = -8000 * self.props.decel
-				}))
+				}))]]
 			end
 		end
 		-- Slow down, if car doesn't accelerate
 		if self.props.accelerate == false and self.props.brake == false then
-			self.object:setacceleration(get_single_accels(self,{
+			--[[self.object:setacceleration(get_single_accels(self,{
 				dir = self.object:getyaw(),
 				accel = -2000
-			}))
+			}))]]
 		end
 		-- Stop acceleration if max_speed reached
 		if merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z) >= self.props.max_speed and self.props.brake == false then
@@ -145,15 +150,15 @@ minetest.register_entity(":streets:melcar",{
 			self.object:setacceleration({x=0,y= -9.81 ,z=0})
 			self.object:setvelocity({x=0,y=0,z=0})
 		end
-		-- Shift gears
+		--[[ Shift gears
 		if self.props.rpm > 3000 and self.props.gear < self.props.gears then
 			self.props.gear = self.props.gear + 1
 			self.props.rpm = math.random(700,800)
 		end
 		if self.props.rpm < 700 and self.props.gear > 1 then
 			self.props.gear = self.props.gear - 1
-			self.props.rpm = self.props.rpm + math.random(200,500)
-		end
-		minetest.chat_send_all(self.props.gear .. " | " .. self.props.rpm)
+			self.props.rpm = self.props.rpm + math.random(500,600)
+		end]]
+		minetest.chat_send_all(self.props.rpm)
 	end
 })
