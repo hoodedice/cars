@@ -32,8 +32,7 @@ minetest.register_entity(":streets:melcar",{
 		vel = 0,
 		steer = false,
 		hud = {
-			gear,
-			rpm,
+			speed
 		}
 	},
 	on_activate = function(self)
@@ -53,9 +52,14 @@ minetest.register_entity(":streets:melcar",{
 				crosshair = false,
 				wielditem = false
 			})
-			-- Start engine
-			self.props.engine_rpm = 500
-			self.props.gear = 1
+			self.props.hud.speed = clicker:hud_add({
+				hud_elem_type = "text",				-- Show text
+				position = {x = 0.5, y = 0.9},		-- At this position
+				scale = {x = 100, y = 100},			-- In a rectangle of this size
+				number = 0xFFFFFF,					-- In this color (hex)
+				name = "streets:melcar:speed",		-- called this name
+				text = "123456789",					-- value
+			})
 		else
 			if self.props.driver == clicker:get_player_name() then
 				-- Update driver
@@ -69,6 +73,8 @@ minetest.register_entity(":streets:melcar",{
 					crosshair = true,
 					wielditem = true
 				})
+				clicker:hud_remove(self.props.hud.speed)
+				self.props.hud.speed = nil
 			else
 				minetest.chat_send_player(clicker:get_player_name(),"This car already has a driver")
 			end
@@ -130,7 +136,12 @@ minetest.register_entity(":streets:melcar",{
 			dir = self.object:getyaw(),
 			force = self.props.vel
 		})
+		-- Copy y velocity (caused by gravity) to make sure it doesn't get overriden
 		finalVelocity.y = self.object:getvelocity().y
 		self.object:setvelocity(finalVelocity)
+		if self.props.driver and self.props.hud.speed ~= nil then
+			--Update HUD
+			minetest.get_player_by_name(self.props.driver):hud_change(self.props.hud.speed, "text", tostring(math.floor(merge_single_forces(finalVelocity.x, finalVelocity.z))))
+		end
 	end
 })
