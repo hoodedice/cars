@@ -20,8 +20,8 @@ minetest.register_entity(":streets:melcar",{
 		on_ground = false,
 		max_speed = 10.0,
 		max_rpm = 4000,
-		accel = 1.5,
-		decel = 1,
+		accel = 6.25,
+		decel = 4.5,
 		gears = 5,
 		shift_time = 0.75,
 		
@@ -127,7 +127,7 @@ minetest.register_entity(":streets:melcar",{
 			if merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z) > 0.1 then
 				table.insert(self.props.forces, force2vec(self,{
 					dir = self.object:getyaw(),
-					accel = -8000 * self.props.decel
+					accel = -8000
 				}))
 			end
 		end
@@ -135,7 +135,7 @@ minetest.register_entity(":streets:melcar",{
 		if self.props.accelerate == false and self.props.brake == false then
 			table.insert(self.props.forces, force2vec(self,{
 				dir = self.object:getyaw(),
-				accel = -2000
+				accel = -8000 * self.props.decel
 			}))
 		end
 		-- Stop acceleration if max_speed reached
@@ -153,7 +153,10 @@ minetest.register_entity(":streets:melcar",{
 				{x = 0, y = -9.81, z = 0}
 			}
 		end
-		
+		-- Add centripetal force
+		local cf = (self.initial_properties.weight * merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) / 10
+		minetest.chat_send_all(cf)
+		--Calculate resulting acceleration		
 		local res = {x = 0, y = -9.81, z = 0}
 		local allX = {}
 		local allY = {}
@@ -182,10 +185,10 @@ minetest.register_entity(":streets:melcar",{
 		res.x = res.x / self.initial_properties.weight
 		res.z = res.z / self.initial_properties.weight
 		
+		--Apply acceleration
 		self.object:setacceleration(res)
-		minetest.chat_send_all("RPM: " .. self.props.rpm .. " | A: " .. accel)
-		minetest.chat_send_all("Resulting (out of " .. #self.props.forces .. " forces: " .. minetest.serialize(res))
 		
+		--Reset forces
 		self.props.forces = {
 			{x = 0, y = -9.81, z = 0}
 		}
