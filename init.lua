@@ -153,9 +153,6 @@ minetest.register_entity(":streets:melcar",{
 				{x = 0, y = -9.81, z = 0}
 			}
 		end
-		-- Add centripetal force
-		local cf = (self.initial_properties.weight * merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) / 10
-		minetest.chat_send_all(cf)
 		--Calculate resulting acceleration		
 		local res = {x = 0, y = -9.81, z = 0}
 		local allX = {}
@@ -181,16 +178,20 @@ minetest.register_entity(":streets:melcar",{
 		end
 		res.z = res.z / #allZ
 		
+		-- Add centripetal force
+		local cf = (self.initial_properties.weight * merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) / (math.cos(math.deg(self.object:getyaw())) * merge_single_forces(res.x, res.z))
+		minetest.chat_send_all(cf)
+		
 		-- Acceleration = Force / Weight
 		res.x = res.x / self.initial_properties.weight
 		res.z = res.z / self.initial_properties.weight
-		
-		--Apply acceleration
-		self.object:setacceleration(res)
 		
 		--Reset forces
 		self.props.forces = {
 			{x = 0, y = -9.81, z = 0}
 		}
+		
+		--Apply acceleration
+		self.object:setacceleration(res)
 	end
 })
