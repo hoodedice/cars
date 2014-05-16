@@ -17,13 +17,9 @@ minetest.register_entity(":streets:melcar",{
 	},
 	props = {
 		driver = nil,
-		on_ground = false,
 		max_speed = 10.0,
-		max_rpm = 4000,
 		accel = 6.25,
 		decel = 4.5,
-		gears = 5,
-		shift_time = 0.75,
 		
 		-- Runtime variables
 		speed = 0,
@@ -42,9 +38,7 @@ minetest.register_entity(":streets:melcar",{
 	},
 	on_activate = function(self)
 		-- Gravity
-		--self.object:setacceleration({x=0,y= -9.81,z=0})
-		self.props.rpm = 500
-		self.props.gear = 1
+		self.object:setacceleration({x=0,y= -9.81,z=0})
 	end,
 	on_rightclick = function(self,clicker)
 		if self.props.driver == nil then
