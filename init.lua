@@ -17,18 +17,14 @@ minetest.register_entity(":streets:melcar",{
 	},
 	props = {
 		driver = nil,
-		max_vel = 10.0,
+		max_vel = 15.0,
 		accel = 6.25,
 		decel = 4.5,
 		brakeDecel = 9,
 		
 		-- Runtime variables
-		speed = 0,
-		rpm = 0,
-		gear = 0,
 		brake = false,
 		accelerate = false,
-		sound = nil,
 		vel = 0,
 		steer = false,
 		hud = {
@@ -58,7 +54,7 @@ minetest.register_entity(":streets:melcar",{
 				scale = {x = 100, y = 100},			-- In a rectangle of this size
 				number = 0xFFFFFF,					-- In this color (hex)
 				name = "streets:melcar:speed",		-- called this name
-				text = "123456789",					-- value
+				text = "Velocity: 0 kn/h",			-- value
 			})
 		else
 			if self.props.driver == clicker:get_player_name() then
@@ -141,7 +137,7 @@ minetest.register_entity(":streets:melcar",{
 		self.object:setvelocity(finalVelocity)
 		if self.props.driver and self.props.hud.speed ~= nil then
 			--Update HUD
-			minetest.get_player_by_name(self.props.driver):hud_change(self.props.hud.speed, "text", tostring(math.floor(merge_single_forces(finalVelocity.x, finalVelocity.z))))
+			minetest.get_player_by_name(self.props.driver):hud_change(self.props.hud.speed, "text", "Velocity: " .. tostring(math.floor(merge_single_forces(finalVelocity.x, finalVelocity.z) * 3.6)) .. " kn/h")
 		end
 	end
 })
