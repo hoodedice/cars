@@ -16,3 +16,5 @@ gearT = {
 	[0] = "N",
 	[1] = "D"
 }
+
+radio = {"K-Rose", "K-DST", "WCTR", "SF-UR", "PlaybackFM", "Radio Los Santos", "bounceFM", "K-JAH", "CSR", "RadioX", "MasterSounds"}

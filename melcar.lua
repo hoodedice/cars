@@ -28,7 +28,8 @@ local melcar = {
 		hud = {
 			speed,
 			gear,
-			name
+			name,
+			radio
 		}
 	}
 }
@@ -75,6 +76,14 @@ function melcar:on_rightclick(clicker)
 			name = "streets:melcar:name",		-- called this name
 			text = self.props.name,				-- value
 		})
+		self.props.hud.radio = clicker:hud_add({
+			hud_elem_type = "text",				-- Show text
+			position = {x = 0.5, y = 0.1},		-- At this position
+			scale = {x = 100, y = 100},			-- In a rectangle of this size
+			number = 0xFFFFFF,					-- In this color (hex)
+			name = "streets:melcar:radio",		-- called this name
+			text = tostring(radio[math.random(1, #radio)]),				-- value
+		})
 		-- Timeout for name (like in GTA)
 		minetest.after(3, function()
 			if self.props.driver then
@@ -97,9 +106,11 @@ function melcar:on_rightclick(clicker)
 			clicker:hud_remove(self.props.hud.speed)
 			clicker:hud_remove(self.props.hud.gear)
 			clicker:hud_remove(self.props.hud.name)
+			clicker:hud_remove(self.props.hud.radio)
 			self.props.hud.speed = nil
 			self.props.hud.gear = nil
 			self.props.hud.name = nil
+			self.props.hud.radio = nil
 		else
 			minetest.chat_send_player(clicker:get_player_name(),"This car already has a driver")
 		end
