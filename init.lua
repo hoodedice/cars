@@ -20,7 +20,7 @@ minetest.register_entity(":streets:melcar",{
 		visual_size = {x=1,y=1},
 		textures = {"textur_yellow.png"},
 		collisionbox = {-0.5,0.0,-1.85,1.35,1.5,1.25},
-		stepheight = 0.5
+		stepheight = 0.6
 	},
 	props = {
 		max_vel = 15.0,
