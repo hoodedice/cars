@@ -1,6 +1,6 @@
 # Blender v2.68 (sub 0) OBJ File: 'car_001.blend'
 # www.blender.org
-mtllib car_001.mtl
+#mtllib car_001.mtl
 o car001
 v 3.999998 8.249995 3.500000
 v 3.999998 8.249996 1.500000
