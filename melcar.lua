@@ -44,7 +44,7 @@ function melcar:on_rightclick(clicker)
 		-- Update driver
 		self.props.driver = clicker:get_player_name()
 		-- Attach player
-		clicker:set_attach(self.object, "passenger1", {x=0,y=-5,z=0}, {x=0,y=0,z=0})
+		clicker:set_attach(self.object, "Root", {x=0,y=-5,z=0}, {x=0,y=0,z=0})
 		-- HUD
 		clicker:hud_set_flags({
 			hotbar = false,
@@ -120,7 +120,8 @@ end
 function melcar:on_step(dtime)
 	-- Player controls
 	if self.props.driver then
-		local ctrl = minetest.get_player_by_name(self.props.driver):get_player_control()
+		local driver = minetest.get_player_by_name(self.props.driver)
+		local ctrl = driver:get_player_control()
 		-- up
 		if ctrl.up then
 			self.props.brake = false
