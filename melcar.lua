@@ -44,7 +44,7 @@ function melcar:on_rightclick(clicker)
 		-- Update driver
 		self.props.driver = clicker:get_player_name()
 		-- Attach player
-		clicker:set_attach(self.object, "", {x=0,y=-5,z=0}, {x=0,y=0,z=0})
+		clicker:set_attach(self.object, "passenger1", {x=0,y=-5,z=0}, {x=0,y=0,z=0})
 		-- HUD
 		clicker:hud_set_flags({
 			hotbar = false,
@@ -149,14 +149,14 @@ function melcar:on_step(dtime)
 			self.props.brake = false
 		end
 		-- left
-		if ctrl.left then
+		if ctrl.left and ctrl.up then
 			self.object:setyaw(self.object:getyaw() + math.pi / 120 + dtime * math.pi / 120)
 			self.props.steerL = true
 		else
 			self.props.steerL = false
 		end
 		-- right
-		if ctrl.right then
+		if ctrl.right and ctrl.up then
 			self.object:setyaw(self.object:getyaw() - math.pi / 120 - dtime * math.pi / 120)
 			self.props.steerR = true
 		else
