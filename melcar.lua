@@ -150,14 +150,18 @@ function melcar:on_step(dtime)
 		end
 		-- left
 		if ctrl.left and ctrl.up then
+			local driver = minetest.get_player_by_name(self.props.driver)
 			self.object:setyaw(self.object:getyaw() + math.pi / 120 + dtime * math.pi / 120)
+			driver:set_look_yaw(self.object:getyaw() + math.pi / 120 + dtime * math.pi / 120)
 			self.props.steerL = true
 		else
 			self.props.steerL = false
 		end
 		-- right
 		if ctrl.right and ctrl.up then
+			local driver = minetest.get_player_by_name(self.props.driver)
 			self.object:setyaw(self.object:getyaw() - math.pi / 120 - dtime * math.pi / 120)
+			driver:set_look_yaw(self.object:getyaw() + math.pi / 120 + dtime * math.pi / 120)
 			self.props.steerR = true
 		else
 			self.props.steerR = false
