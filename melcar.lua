@@ -45,6 +45,9 @@ function melcar:on_rightclick(clicker)
 		self.props.driver = clicker:get_player_name()
 		-- Attach player
 		clicker:set_attach(self.object, "Root", {x=0,y=-5,z=0}, {x=0,y=0,z=0})
+		-- Move camera
+		clicker:set_eye_offset({x=0,y=0,z=0}, {x=4,y=0,z=-5})
+		clicker:set_look_yaw(self.object:getyaw())
 		-- HUD
 		clicker:hud_set_flags({
 			hotbar = false,
