@@ -46,7 +46,7 @@ function melcar:on_rightclick(clicker)
 		-- Attach player
 		clicker:set_attach(self.object, "Root", {x=0,y=-5,z=0}, {x=0,y=0,z=0})
 		-- Move camera
-		clicker:set_eye_offset({x=0,y=0,z=0}, {x=4,y=0,z=-5})
+		clicker:set_eye_offset({x=0,y=-2.5,z=0}, {x=4,y=0,z=-5})
 		clicker:set_look_yaw(self.object:getyaw())
 		-- HUD
 		clicker:hud_set_flags({
@@ -99,6 +99,8 @@ function melcar:on_rightclick(clicker)
 			self.props.driver = nil
 			-- Detach player
 			clicker:set_detach()
+			-- Move camera to default
+			clicker:set_eye_offset({x=0,y=0,z=0}, {x=0,y=0,z=0})
 			-- HUD
 			clicker:hud_set_flags({
 				hotbar = true,
@@ -165,7 +167,7 @@ function melcar:on_step(dtime)
 			self.props.brake = false
 		end
 		-- left
-		if ctrl.left and ctrl.up then
+		if ctrl.left and self.props.vel > 0 then
 			self.object:setyaw(self.object:getyaw() + math.pi / 120 + dtime * math.pi / 120)
 			minetest.get_player_by_name(self.props.driver):set_look_yaw(self.object:getyaw() + math.pi / 120 + dtime * math.pi / 120)
 			self.props.steerL = true
@@ -173,7 +175,7 @@ function melcar:on_step(dtime)
 			self.props.steerL = false
 		end
 		-- right
-		if ctrl.right and ctrl.up then
+		if ctrl.right and self.props.vel > 0 then
 			self.object:setyaw(self.object:getyaw() - math.pi / 120 - dtime * math.pi / 120)
 			minetest.get_player_by_name(self.props.driver):set_look_yaw(self.object:getyaw() + math.pi / 120 + dtime * math.pi / 120)
 			self.props.steerR = true
@@ -190,9 +192,9 @@ function melcar:on_step(dtime)
 	end
 	
 	--Apply velocity
-	local finalVelocity = force2vec(self, {
+	local finalVelocity = scalar2vec(self, {
 		dir = self.object:getyaw(),
-		force = self.props.vel
+		scalar = self.props.vel
 	})
 	-- Copy y velocity (caused by gravity) to make sure it doesn't get overriden
 	finalVelocity.y = self.object:getvelocity().y
