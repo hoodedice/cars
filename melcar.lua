@@ -125,6 +125,17 @@ function melcar:on_step(dtime)
 	if self.props.driver then
 		local driver = minetest.get_player_by_name(self.props.driver)
 		local ctrl = driver:get_player_control()
+		local pos = self.object:getpos()
+		local under = minetest.get_node_or_nil({x = pos.x, y = pos.y - 1, z = pos.z})
+		local inside = minetest.get_node_or_nil(pos)
+		-- Update gravity (bad implementation, to be changed soon)
+		if inside then
+			if minetest.registered_nodes[inside.name] then
+				if minetest.get_item_group(inside.name, "liquid") then
+					self.object:setacceleration({x = 0, y = -0.5, z = 0})
+				end
+			end
+		end
 		-- up
 		if ctrl.up then
 			self.props.brake = false
@@ -185,16 +196,14 @@ function melcar:on_step(dtime)
 	-- Copy y velocity (caused by gravity) to make sure it doesn't get overriden
 	finalVelocity.y = self.object:getvelocity().y
 	self.object:setvelocity(finalVelocity)
-	self:update_hud(finalVelocity)
+	self.props.vel = merge_single_forces(finalVelocity.x, finalVelocity.z)
+	self:update_hud()
 end
 
-function melcar:update_hud(v)
-	if not v then
-		v = {x = 0, z = 0}
-	end
+function melcar:update_hud()
 	if self.props.driver and self.props.hud.speed ~= nil and self.props.hud.gear ~= nil then
 		--Update HUD
-		minetest.get_player_by_name(self.props.driver):hud_change(self.props.hud.speed, "text", "Velocity: " .. tostring(math.floor(merge_single_forces(v.x, v.z) * 3.6)) .. " kn/h")
+		minetest.get_player_by_name(self.props.driver):hud_change(self.props.hud.speed, "text", "Velocity: " .. tostring(math.abs(math.ceil(self.props.vel * 3.6))) .. " kn/h")
 		minetest.get_player_by_name(self.props.driver):hud_change(self.props.hud.gear, "text", gearT[self.props.gear])
 	end
 end
