@@ -182,7 +182,7 @@ function melcar:on_step(dtime)
 		end
 	end
 	-- Stop if very slow (e.g. because driver brakes)
-	if math.abs(merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) < 0.1 and self.props.accelerate == false then
+	if math.abs(self.props.vel) < 0.1 and self.props.accelerate == false then
 		self.object:setvelocity({x = 0,y = self.object:getvelocity().y,z = 0})
 		self.props.gear = 0
 		self:update_hud_gear()
