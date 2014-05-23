@@ -141,6 +141,7 @@ function melcar:on_step(dtime)
 			self.props.brake = false
 			self.props.accelerate = true
 			self.props.gear = 1
+			self:update_hud_gear()
 			-- Only accelerate if max_speed not reached and player does not steer
 			if self.props.vel < self.props.max_vel and self.props.steerL == false and self.props.steerR == false then
 				self.props.vel = self.props.vel + (self.props.accel * dtime)
@@ -184,7 +185,7 @@ function melcar:on_step(dtime)
 	if math.abs(merge_single_forces(self.object:getvelocity().x, self.object:getvelocity().z)) < 0.1 and self.props.accelerate == false then
 		self.object:setvelocity({x = 0,y = self.object:getvelocity().y,z = 0})
 		self.props.gear = 0
-		self:update_hud()
+		self:update_hud_gear()
 		return
 	end
 	
@@ -197,14 +198,20 @@ function melcar:on_step(dtime)
 	finalVelocity.y = self.object:getvelocity().y
 	self.object:setvelocity(finalVelocity)
 	self.props.vel = merge_single_forces(finalVelocity.x, finalVelocity.z)
-	self:update_hud()
+	self:update_hud_speed()
 end
 
-function melcar:update_hud()
+function melcar:update_hud_gear()
 	if self.props.driver and self.props.hud.speed ~= nil and self.props.hud.gear ~= nil then
-		--Update HUD
-		minetest.get_player_by_name(self.props.driver):hud_change(self.props.hud.speed, "text", "Velocity: " .. tostring(math.abs(math.ceil(self.props.vel * 3.6))) .. " kn/h")
+		-- Update HUD
 		minetest.get_player_by_name(self.props.driver):hud_change(self.props.hud.gear, "text", gearT[self.props.gear])
+	end
+end
+
+function melcar:update_hud_speed()
+	if self.props.driver and self.props.hud.speed ~= nil and self.props.hud.gear ~= nil then
+		-- Update HUD
+		minetest.get_player_by_name(self.props.driver):hud_change(self.props.hud.speed, "text", "Velocity: " .. tostring(math.abs(math.floor(self.props.vel * 3.6))) .. " kn/h")
 	end
 end
 
