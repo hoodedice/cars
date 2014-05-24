@@ -183,7 +183,7 @@ function melcar:on_step(dtime)
 			self.props.brake = false
 		end
 		-- left
-		if ctrl.left and self.props.vel > 0 then
+		if ctrl.left and self.props.vel > 0 and under and minetest.registered_nodes[under.name].drawtype == "normal" then
 			self.object:setyaw(self.object:getyaw() + math.pi / 120 + dtime * math.pi / 120)
 			minetest.get_player_by_name(self.props.driver):set_look_yaw(self.object:getyaw() + math.pi / 120 + dtime * math.pi / 120)
 			self.props.steerL = true
@@ -191,7 +191,7 @@ function melcar:on_step(dtime)
 			self.props.steerL = false
 		end
 		-- right
-		if ctrl.right and self.props.vel > 0 then
+		if ctrl.right and self.props.vel > 0 and under and minetest.registered_nodes[under.name].drawtype == "normal" then
 			self.object:setyaw(self.object:getyaw() - math.pi / 120 - dtime * math.pi / 120)
 			minetest.get_player_by_name(self.props.driver):set_look_yaw(self.object:getyaw() + math.pi / 120 + dtime * math.pi / 120)
 			self.props.steerR = true
