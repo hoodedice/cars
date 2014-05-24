@@ -12,12 +12,13 @@ local melcar = {
 	},
 	props = {
 		name = "Melcar",
-		max_vel = 15.0,
+		max_vel = 35.0,
 		accel = 6.25,
 		decel = 4.5,
 		brakeDecel = 9,
 		
 		-- Runtime variables
+		vol = 0,
 		driver = nil,
 		brake = false,
 		accelerate = false,
@@ -35,8 +36,13 @@ local melcar = {
 }
 
 function melcar:on_activate(staticdata)
-	-- Gravity
-	self.object:setacceleration({x=0,y= -9.81,z=0})
+	-- Calculate some stuff
+	-- Volume based on collisionbox
+	local box = self.initial_properties.collisionbox
+	local vol = (box[4] - box[1]) * (box[5] - box[2]) * (box[6] - box[3])
+	self.props.vol = vol
+	-- Copy weight
+	self.props.weight = self.initial_properties.weight
 end
 
 function melcar:on_rightclick(clicker)
@@ -126,26 +132,29 @@ function melcar:on_step(dtime)
 	local pos = self.object:getpos()
 	local under = minetest.get_node_or_nil({x = pos.x, y = pos.y - 1, z = pos.z})
 	local inside = minetest.get_node_or_nil(pos)
+	-- Apply gravity
+	local grav = 0
+	if inside and minetest.registered_nodes[inside.name] then
+		if inside.name == "air" then
+			grav = -9.81
+		elseif minetest.get_item_group(inside.name, "liquid") ~= 0 then
+			-- Use this for all liquids
+			grav = (1 * -9.81 * self.props.vol) / self.props.weight
+		end
+		self.object:setacceleration({x = 0, y = grav, z = 0})
+	end
 	-- Player controls
 	if self.props.driver then
 		local driver = minetest.get_player_by_name(self.props.driver)
 		local ctrl = driver:get_player_control()
-		-- Update gravity (bad implementation, to be changed soon)
-		if inside then
-			if minetest.registered_nodes[inside.name] then
-				if minetest.get_item_group(inside.name, "liquid") then
-					self.object:setacceleration({x = 0, y = -0.5, z = 0})
-				end
-			end
-		end
 		-- up
 		if ctrl.up then
 			self.props.brake = false
 			self.props.accelerate = true
 			self.props.gear = 1
 			self:update_hud_gear()
-			-- Only accelerate if max_speed not reached and player does not steer
-			if self.props.vel < self.props.max_vel and self.props.steerL == false and self.props.steerR == false then
+			-- Only accelerate if max_speed not reached and player does not steer and on solid
+			if self.props.vel < self.props.max_vel and self.props.steerL == false and self.props.steerR == false and under and minetest.registered_nodes[under.name].drawtype == "normal" then
 				self.props.vel = self.props.vel + (self.props.accel * dtime)
 			end
 		else
