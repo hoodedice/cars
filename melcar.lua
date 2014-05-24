@@ -128,6 +128,13 @@ function melcar:on_rightclick(clicker)
 	end
 end
 
+function melcar:decel(dtime)
+	-- Decelerate down to more or less 0
+	if self.props.vel > 0 then
+		self.props.vel = self.props.vel - (self.props.decel * dtime)
+	end
+end
+
 function melcar:on_step(dtime)
 	local pos = self.object:getpos()
 	local under = minetest.get_node_or_nil({x = pos.x, y = pos.y - 1, z = pos.z})
@@ -157,12 +164,12 @@ function melcar:on_step(dtime)
 			if self.props.vel < self.props.max_vel and self.props.steerL == false and self.props.steerR == false and under and minetest.registered_nodes[under.name].drawtype == "normal" then
 				self.props.vel = self.props.vel + (self.props.accel * dtime)
 			end
+			if under and minetest.registered_nodes[under.name].drawtype ~= "normal" then
+				self:decel(dtime)
+			end
 		else
 			self.props.accelerate = false
-			-- Decelerate down to more or less 0
-			if self.props.vel > 0 then
-				self.props.vel = self.props.vel - (self.props.decel * dtime)
-			end
+			self:decel(dtime)
 		end
 		-- down
 		if ctrl.down then
@@ -192,10 +199,7 @@ function melcar:on_step(dtime)
 			self.props.steerR = false
 		end
 	else
-		-- Decelerate down to more or less 0
-		if self.props.vel > 0 then
-			self.props.vel = self.props.vel - (self.props.decel * dtime)
-		end
+		self:decel(dtime)
 	end
 	-- Stop if very slow (e.g. because driver brakes)
 	if math.abs(self.props.vel) < 0.1 and self.props.accelerate == false then
