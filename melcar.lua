@@ -123,13 +123,13 @@ function melcar:on_rightclick(clicker)
 end
 
 function melcar:on_step(dtime)
+	local pos = self.object:getpos()
+	local under = minetest.get_node_or_nil({x = pos.x, y = pos.y - 1, z = pos.z})
+	local inside = minetest.get_node_or_nil(pos)
 	-- Player controls
 	if self.props.driver then
 		local driver = minetest.get_player_by_name(self.props.driver)
 		local ctrl = driver:get_player_control()
-		local pos = self.object:getpos()
-		local under = minetest.get_node_or_nil({x = pos.x, y = pos.y - 1, z = pos.z})
-		local inside = minetest.get_node_or_nil(pos)
 		-- Update gravity (bad implementation, to be changed soon)
 		if inside then
 			if minetest.registered_nodes[inside.name] then
@@ -181,6 +181,11 @@ function melcar:on_step(dtime)
 			self.props.steerR = true
 		else
 			self.props.steerR = false
+		end
+	else
+		-- Decelerate down to more or less 0
+		if self.props.vel > 0 then
+			self.props.vel = self.props.vel - (self.props.decel * dtime)
 		end
 	end
 	-- Stop if very slow (e.g. because driver brakes)
